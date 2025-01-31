@@ -31,19 +31,28 @@ from pdfminer.high_level import extract_text
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Title and description for your Streamlit app
 #---------------------------------------------------------------------------------------------------------------------------------
-st.set_page_config(page_title="PDF Playground | v0.1",
+st.set_page_config(page_title="PDF Playground | v0.2",
                     layout="wide",
                     page_icon="📘",            
                     initial_sidebar_state="collapsed")
 #----------------------------------------
-st.title(f""":rainbow[PDF Playground]""")
-#st.markdown(
-    #'''
-    #Created by | <a href="mailto:avijit.mba18@gmail.com">Avijit Chakraborty</a> ( 📑 [Resume](https://resume-avijitc.streamlit.app/) | :bust_in_silhouette: [LinkedIn](https://www.linkedin.com/in/avijit2403/) | :computer: [GitHub](https://github.com/DesolateTraveller) ) |
-    #for best view of the app, please **zoom-out** the browser to **75%**.
-    #''',
-    #unsafe_allow_html=True)
-#st.info('**An easy-to-use, open-source PDF application to preview and extract content and metadata from PDFs, add or remove passwords, modify, merge, convert and compress PDFs**', icon="ℹ️")
+st.markdown(
+    """
+    <style>
+    .title {
+        text-align: center;
+        font-size: 40px;
+        font-weight: bold;
+        background: linear-gradient(to left, red, orange, blue, indigo, violet);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    </style>
+    <div class="title">PDF Playground</div>
+    """,
+    unsafe_allow_html=True
+)
+   
 #----------------------------------------
 st.markdown(
     """
@@ -77,6 +86,7 @@ st.markdown(
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Functions & Definitions
 #---------------------------------------------------------------------------------------------------------------------------------
+
 @st.cache_data(ttl="2h")
 def pdf_to_images(pdf_file):
     doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
@@ -88,8 +98,6 @@ def pdf_to_images(pdf_file):
         images.append(img)
     return images
 
-#------------------------------------------------------------------------------------
-
 def merge_pdfs(pdf_files):
     merger = PdfMerger()
     for pdf_file in pdf_files:
@@ -100,8 +108,6 @@ def merge_pdfs(pdf_files):
     merged_pdf.seek(0)
     return merged_pdf
 
-#------------------------------------------------------------------------------------
-
 def compress_pdf(input_pdf, output_pdf, compression_factor):
     reader = PdfReader(input_pdf)
     writer = PdfWriter()
@@ -110,8 +116,6 @@ def compress_pdf(input_pdf, output_pdf, compression_factor):
         writer.add_page(page)
     with open(output_pdf, 'wb') as f_out:
         writer.write(f_out)
-
-#------------------------------------------------------------------------------------
 
 def pdf_to_images_bytes(pdf_bytes):
     images = convert_from_bytes(pdf_bytes)
@@ -131,66 +135,28 @@ def extract_text(pdf_file):
 
 def convert_pdf_to_images(pdf_bytes):
     return convert_from_bytes(pdf_bytes)
+
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Main app
 #---------------------------------------------------------------------------------------------------------------------------------
 
-stats_expander = st.expander("**:blue[App Capabilities]**", expanded=False)
-with stats_expander:
+#stats_expander = st.expander("**:blue[App Capabilities]**", expanded=False)
+#with stats_expander:
 
-        st.markdown("""
-            <style>
-            .info-container {
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-left: 6px solid #3498db;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            }
-            .info-container h3 {
-            color: #3498db;
-            font-weight: bold;
-            margin-bottom: 10px;
-            }
-            .info-container p {
-            color: #333;
-            margin: 5px 0;
-            }
-            .info-container ul {
-            list-style-type: none;
-            padding: 0;
-            }
-            .info-container li {
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            }
-            .info-container li:before {
-            content: "⭐";
-            margin-right: 10px;
-            color: #3498db;
-            font-size: 1.2em;
-            }
-            </style>
-
-            <div class="info-container">
-            <h3>🛠️ App Capabilities</h3>
-            <p>This app is designed to perform a variety of tasks including:</p>
-            <ul>
-            <li><strong>View</strong> -         It allows you to preview PDF files directly within the application.</li>
-            <li><strong>Extract</strong> -      It is designed to extract text and metadata from PDF files.</li>
-            <li><strong>Merge</strong> -        It lets you combine multiple PDF files into a single document.</li>
-            <li><strong>Compress</strong> -     It is used to reduce the file size of PDF documents.</li>
-            <li><strong>Protect</strong> -      It enables you to add password protection to your PDF files.</li>
-            <li><strong>Unlock</strong> -       It allows you to remove password protection from PDF files.</li>
-            <li><strong>Rotate</strong> -       It lets you change the orientation of pages within a PDF file.</li>
-            <li><strong>Resize</strong> -       It tab allows you to adjust the dimensions of a PDF file. </li>    
-            <li><strong>Convert</strong> -      It offers conversion options between PDF and other formats, such as word or images.</li>                    
-            </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
+with st.popover("**:red[App Capabilities]**", disabled=False, use_container_width=True): 
+    st.info("""
+                
+            - **View** -           It allows you to preview PDF files directly within the application.
+            - Extract       It is designed to extract text and metadata from PDF files.
+            - Merge         It lets you combine multiple PDF files into a single document.
+            - Compress      It is used to reduce the file size of PDF documents.
+            - Protect       It enables you to add password protection to your PDF files.
+            - Unlock        It allows you to remove password protection from PDF files.
+            - Rotate        It lets you change the orientation of pages within a PDF file.
+            - Resize        It tab allows you to adjust the dimensions of a PDF file.    
+            - Convert       It offers conversion options between PDF and other formats, such as word or images. 
+         
+            """)
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Content
 #---------------------------------------------------------------------------------------------------------------------------------
