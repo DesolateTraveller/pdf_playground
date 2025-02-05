@@ -142,7 +142,6 @@ def convert_pdf_to_images(pdf_bytes):
 
 #stats_expander = st.expander("**:blue[App Capabilities]**", expanded=False)
 #with stats_expander:
-
 with st.popover("**:red[App Capabilities]**", disabled=False, use_container_width=True): 
     st.info("""
                 
@@ -161,15 +160,49 @@ with st.popover("**:red[App Capabilities]**", disabled=False, use_container_widt
 ### Content
 #---------------------------------------------------------------------------------------------------------------------------------
 
+st.divider()
+
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "view"
+
+col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+with col1:
+    if st.button("**View**",use_container_width=True):
+        st.session_state.current_page = "view"
+with col2:
+    if st.button("**Extract**",use_container_width=True):
+        st.session_state.current_page = "extract"
+with col3:
+    if st.button("**Merge**",use_container_width=True):
+        st.session_state.current_page = "merge"
+with col4:
+    if st.button("**Compress**",use_container_width=True):
+        st.session_state.current_page = "compress"
+with col5:
+    if st.button("**Protect**",use_container_width=True):
+        st.session_state.current_page = "protect"
+with col6:
+    if st.button("**Unlock**",use_container_width=True):
+        st.session_state.current_page = "unlock"
+with col7:
+    if st.button("**Rotate**",use_container_width=True):
+        st.session_state.current_page = "rotate"
+with col8:
+    if st.button("**Resize**",use_container_width=True):
+        st.session_state.current_page = "resize"       
+
+page = st.session_state.current_page 
+
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9  = st.tabs(["**View**","**Extract**","**Merge**","**Compress**","**Protect**","**Unlock**","**Rotate**","**Resize**","**Convert**"])
      
 #---------------------------------------------------------------------------------------------------------------------------------
 ### View
 #---------------------------------------------------------------------------------------------------------------------------------
 
-with tab1:
+#with tab1:
+if page == "view":
 
-        st.write("""
+        st.info("""
         The **View** tab allows you to preview PDF files directly within the application. 
         You can upload a PDF and view its content without any external software.
         """)
