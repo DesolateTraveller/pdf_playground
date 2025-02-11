@@ -39,20 +39,27 @@ st.set_page_config(page_title="PDF Playground | v0.2",
 st.markdown(
     """
     <style>
-    .title {
+    .title-large {
         text-align: center;
-        font-size: 40px;
+        font-size: 35px;
         font-weight: bold;
         background: linear-gradient(to left, red, orange, blue, indigo, violet);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    .title-small {
+        text-align: center;
+        font-size: 20px;
+        background: linear-gradient(to left, red, orange, blue, indigo, violet);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
     </style>
-    <div class="title">PDF Playground</div>
+    <div class="title-large">PDF Playground</div>
+    <div class="title-small">Play with PDF</div>
     """,
     unsafe_allow_html=True
 )
-   
 #----------------------------------------
 st.markdown(
     """
@@ -108,14 +115,39 @@ def merge_pdfs(pdf_files):
     merged_pdf.seek(0)
     return merged_pdf
 
-def compress_pdf(input_pdf, output_pdf, compression_factor):
-    reader = PdfReader(input_pdf)
-    writer = PdfWriter()
-    for page in reader.pages:
-        page.compress_content_streams()
-        writer.add_page(page)
-    with open(output_pdf, 'wb') as f_out:
-        writer.write(f_out)
+@st.cache_data(ttl="2h")
+def compress_pdf(input_pdf, compression_factor=0.5):
+    """Compress a PDF file and return it as bytes."""
+    
+    doc = fitz.open(stream=input_pdf.read(), filetype="pdf")
+    output_stream = io.BytesIO()
+    new_doc = fitz.open()  # Create a new PDF
+
+    for page in doc:
+        # Convert PDF page to Pixmap
+        pix = page.get_pixmap()  
+        
+        # Convert Pixmap to PIL Image
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        
+        # Compress the image and store in a BytesIO stream
+        img_stream = io.BytesIO()
+        img.save(img_stream, format="JPEG", quality=int(compression_factor * 100))
+        img_stream.seek(0)
+
+        # Proper way to create a new Pixmap from a compressed JPEG
+        compressed_pix = fitz.Pixmap(fitz.csRGB, fitz.open("jpeg", img_stream).extract_image(0)["image"])
+
+        # Create new page and insert compressed image
+        new_page = new_doc.new_page(width=page.rect.width, height=page.rect.height)
+        new_page.insert_image(page.rect, pixmap=compressed_pix)
+
+    # Save the new compressed PDF
+    new_doc.save(output_stream)
+    new_doc.close()
+
+    output_stream.seek(0)
+    return output_stream.getvalue()  # Return compressed PDF as bytes
 
 def pdf_to_images_bytes(pdf_bytes):
     images = convert_from_bytes(pdf_bytes)
@@ -167,7 +199,7 @@ if "current_page" not in st.session_state:
 
 col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
 with col1:
-    if st.button("**View**",use_container_width=True):
+    if st.button("**:red[View]**",use_container_width=True):
         st.session_state.current_page = "view"
 with col2:
     if st.button("**Extract**",use_container_width=True):
@@ -202,181 +234,175 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9  = st.tabs(["**View**","**E
 #with tab1:
 if page == "view":
 
-        st.info("""
-        The **View** tab allows you to preview PDF files directly within the application. 
-        You can upload a PDF and view its content without any external software.
-        """)
-        uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_preview")
-        st.divider()
+            #st.session_state.pdf_tab = "View"
+            st.info("""The **View** tab allows you to preview PDF files directly within the application. You can upload a PDF and view its content without any external software.""")
 
-        if uploaded_file is not None:
+            col1, col2, col3 = st.columns((0.2,0.6,0.2))
+            with col1:           
+                with st.container(border=True):
+                    uploaded_file = st.file_uploader("**Choose PDF file**",type="pdf",key="file_uploader_preview")
+                    if uploaded_file is not None:
+                        st.success("PDFs loaded successfully!")
 
-                col1, col2 = st.columns((0.8,0.2))
-                with col1:
-                    
-                    st.success("PDFs loaded successfully!")
-                    with st.container(height=650,border=True):
+                        try:
+                            with col2:
+                                with st.container(border=True):
+                                    
+                                    images = pdf_to_images(uploaded_file)
+                                    if images and isinstance(images, list):
+                                        for i, image in enumerate(images):
+                                            st.image(image, caption=f'Page {i + 1}', use_column_width=True)
+                                    else:
+                                        st.warning("No images were generated from the PDF.")
 
-                        images = pdf_to_images(uploaded_file)
-                        for i, image in enumerate(images):
-                            st.image(image, caption=f'Page {i + 1}', use_column_width=True)
+                            with col3:
+                                with st.container(border=True):
 
-                with col2:
-
-                    stats_expander = st.expander("**MetaData**", expanded=True)
-                    with stats_expander:
-                        metadata = extract_metadata(uploaded_file)
-                        if metadata:
-
-                            metadata_df = pd.DataFrame(list(metadata.items()), columns=["Key", "Value"])
-                            st.table(metadata_df)
-                        else:
-                            st.write("No metadata found in the PDF file.")
-
-        else:
-                st.warning("Please upload a PDF file to view.")
+                                    metadata = extract_metadata(uploaded_file)
+                                    if metadata:
+                                        metadata_df = pd.DataFrame(list(metadata.items()), columns=["Key", "Value"])
+                                        st.table(metadata_df)
+                                    else:
+                                        st.write("No metadata found in the PDF file.")
+                        except Exception as e:
+                            st.error(f"An error occurred while processing the PDF: {e}")
+                    else:
+                        st.warning("Please upload a PDF file to view.")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Extract
 #---------------------------------------------------------------------------------------------------------------------------------
 
-with tab2:
+#with tab2:
+if page == "extract":
 
-    st.write("""
-    The **Extract** tab is designed to extract text and metadata from PDF files. 
-    You can upload a PDF, and the tool will pull out the text content for further analysis or editing.
-    """)
-    uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf", key="file_uploader_extract")
-    st.divider()
+            #st.session_state.pdf_tab = "Extract"        
+            st.info("""The **Extract** tab is designed to extract text and metadata from PDF files. You can upload a PDF, and the tool will pull out the text content for further analysis or editing.""")
 
-    if uploaded_file is not None:
+            col1, col2 = st.columns((0.2,0.8))
+            with col1:           
+                with st.container(border=True):            
+                    uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf", key="file_uploader_extract")
+                    if uploaded_file is not None:
+                        st.success("Text extracted successfully!")
+                        #st.write(f"You have selected **{uploaded_file.name}** for text extraction.")
 
-        col1, col2 = st.columns((0.2,0.8))
-        with col1:
+                        try:
+                            with col2:
+                                with st.container(height=650,border=True):
              
-            st.write(f"You have selected **{uploaded_file.name}** for text extraction.")
-            if st.button("**Extract Text**"):
-                with st.spinner("Extracting text..."):
-                    text = extract_text(uploaded_file)
-                st.success("Text extracted successfully!")
-
-                st.download_button(label="**📥 Download Extracted Text**",data=text,file_name="extracted.txt",mime="application/txt")
-
-                with col2:
-
-                    st.text_area("Extracted Text", value=text, height=700)
-
-    else:
-                st.warning("Please upload a PDF file to extract.")
+                                    with st.spinner("Extracting text..."):
+                                        text = extract_text(uploaded_file)
+                                        st.text_area("", value=text, height=7000)
+                                        
+                                st.download_button(label="**📥 Download Extracted Text**",data=text,file_name="extracted.txt",mime="application/txt") 
+                                                    
+                        except Exception as e:
+                            st.error(f"An error occurred while processing the PDF: {e}")
+                    else:
+                        st.warning("Please upload a PDF file to extract.")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Merge
 #---------------------------------------------------------------------------------------------------------------------------------
 
-with tab3:
+#with tab3:
+if page == "merge":
+    
+            #st.session_state.pdf_tab = "Merge"   
+            st.info("""The **Merge** tab lets you combine multiple PDF files into a single document. Simply upload the PDFs you wish to merge, arrange them in the desired order, and merge them into one.""")
 
-            st.write("""
-            The **Merge** tab lets you combine multiple PDF files into a single document. 
-            Simply upload the PDFs you wish to merge, arrange them in the desired order, and merge them into one.
-            """)
-            uploaded_files = st.file_uploader("**Choose PDF files**", type="pdf", accept_multiple_files=True)
-            st.divider()
-
-            if uploaded_files:
-
-                col1, col2 = st.columns((0.2,0.8))
-                with col1:
+            col1, col2 = st.columns((0.2,0.8))
+            with col1:           
+                with st.container(border=True):              
+            
+                    uploaded_files = st.file_uploader("**Choose PDF files**", type="pdf", accept_multiple_files=True)
+                    if uploaded_files:
                     
-                    st.write(f"You have selected **{len(uploaded_files)} PDF file(s)** for merging.")
-                    if st.button("**Merge PDFs**"):
-                        with st.spinner("Merging PDFs..."):
-                            merged_pdf = merge_pdfs(uploaded_files)
-                        st.success("PDFs merged successfully!")
+                        st.write(f"You have selected **{len(uploaded_files)} PDF file(s)** for merging.")
+                        if st.button("**Merge PDFs**"):
+                            with st.spinner("Merging PDFs..."):
+                                merged_pdf = merge_pdfs(uploaded_files)
+                            st.success("PDFs merged successfully!")
 
-                        st.download_button(label="**📥 Download Merged PDF**",data=merged_pdf,file_name="merged_pdf.pdf",mime="application/pdf")
+                            st.download_button(label="**📥 Download Merged PDF**",data=merged_pdf,file_name="merged_pdf.pdf",mime="application/pdf")
 
-                        with col2:
+                            with col2:
 
-                            #st.subheader("**View : Merged PDF**",divider='blue')    
-                            with st.container(height=650,border=True):
+                                #st.subheader("**View : Merged PDF**",divider='blue')    
+                                with st.container(height=650,border=True):
 
-                                merged_pdf.seek(0)
-                                images = pdf_to_images(merged_pdf)
-                                for page_num, img in enumerate(images):
-                                    st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
+                                    merged_pdf.seek(0)
+                                    images = pdf_to_images(merged_pdf)
+                                    for page_num, img in enumerate(images):
+                                        st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
 
-            else:
-                    st.warning("Please upload PDF files to Merge.")
+                    else:
+                        st.warning("Please upload PDF files to Merge.")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Compress
 #---------------------------------------------------------------------------------------------------------------------------------
 
-with tab4:
+#with tab4:
+if page == "compress":
+    
+            #st.session_state.pdf_tab = "Compress"   
+            st.info("""The **Compress** tab is used to reduce the file size of PDF documents. This is useful when you need to share files with size restrictions or save storage space.""") 
 
-        st.write("""
-        The **Compress** tab is used to reduce the file size of PDF documents. 
-        This is useful when you need to share files with size restrictions or save storage space.
-        """) 
-        uploaded_files = st.file_uploader("**Choose PDF file**", type="pdf", accept_multiple_files=True)
-        st.divider()
-
-        if uploaded_files:
-
-            #col1, col2 = st.columns((0.2,0.8))
-            #with col1:
-
-                st.write(f"You have selected **{len(uploaded_files)} PDF file** for compress.")
-                compression_factor = st.slider("**Select compression factor**", 0.1, 1.0, 0.5, 0.1)
+            col1, col2 = st.columns((0.2,0.8))
+            with col1:           
+                with st.container(border=True):              
                 
-                if st.button("**Compress PDF**"):
+                    uploaded_files = st.file_uploader("**Choose PDF file**", type="pdf", accept_multiple_files=True)
+                    if uploaded_files:
 
-                        for uploaded_file in uploaded_files:
-                            temp_input_path = f"/tmp/{uploaded_file.name}"
-                            temp_output_path = f"compressed_{uploaded_file.name}"
+                        st.write(f"You have selected **{len(uploaded_files)} PDF file** for compress.")
+                        st.divider()
+                        compression_factor = st.slider("**Select compression factor**", 0.1, 1.0, 0.5, 0.1)
+                
+                        if st.button("**Compress PDF**"):
 
-                            with open(temp_input_path, "wb") as f:
-                                f.write(uploaded_file.getbuffer())
+                            compressed_pdfs = []
+                            for uploaded_file in uploaded_files:
+                                with st.spinner("Compressing PDFs..."):
+                                    compressed_pdf_bytes = compress_pdf(uploaded_file, compression_factor)
+                                    compressed_pdfs.append(compressed_pdf_bytes)
 
-                            with st.spinner("Compressing PDFs..."):
-                                compress_pdf(temp_input_path, temp_output_path, compression_factor)
-
-                            with open(temp_output_path, "rb") as f:
-                                compressed_pdf = f.read()
-                            
                             st.success("PDFs compressed successfully!")
 
-                            original_size = os.path.getsize(temp_input_path)
-                            compressed_size = os.path.getsize(temp_output_path)
-                            compression_ratio = (1 - compressed_size / original_size) * 100
+                            for i, uploaded_file in enumerate(uploaded_files):
+                                original_size = len(uploaded_file.getvalue())
+                                compressed_size = len(compressed_pdfs[i])
+                                compression_ratio = (1 - compressed_size / original_size) * 100
 
-                            st.write(f"**Original PDF size of** : {original_size / 1024:.2f} KB")
-                            st.write(f"**Compressed PDF size of**: {compressed_size / 1024:.2f} KB")
-                            st.write(f"**Compression achieved**: {compression_ratio:.2f}%")
+                                st.write(f"**Original PDF size**: {original_size / 1024:.2f} KB")
+                                st.write(f"**Compressed PDF size**: {compressed_size / 1024:.2f} KB")
+                                st.write(f"**Compression achieved**: {compression_ratio:.2f}%")
 
-                            st.download_button(label="**📥 Download Compressed PDF**",data=compressed_pdf,file_name="compressed_pdf.pdf",mime="application/pdf")
+                            st.download_button(label="**📥 Download Compressed PDF**",data=compressed_pdfs[i],file_name="compressed_pdf.pdf",mime="application/pdf")
 
-                            #with col2:
+                            with col2:
 
                                 #st.subheader("**View : Compressed PDF**",divider='blue')    
-                                #with st.container(height=700,border=True):
+                                with st.container(height=700,border=True):
 
-                                    #compressed_pdf.seek(0)
-                                    #images = pdf_to_images_bytes(compressed_pdf)
-                                    #for page_num, img in enumerate(images):
-                                        #st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
+                                    compressed_pdf.seek(0)
+                                    images = pdf_to_images_bytes(compressed_pdf)
+                                    for page_num, img in enumerate(images):
+                                        st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
 
-                                    #if 'compressed_pdf' in locals():  # Ensure compressed_pdf exists before processing
-                                        #compressed_pdf_bytes = compressed_pdf  # Assuming compressed_pdf is already in bytes
-                                        #images = pdf_to_images_bytes(compressed_pdf)
-                                        #for page_num, img in enumerate(images):
-                                            #st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
+                                    if 'compressed_pdf' in locals():  # Ensure compressed_pdf exists before processing
+                                        compressed_pdf_bytes = compressed_pdf  # Assuming compressed_pdf is already in bytes
+                                        images = pdf_to_images_bytes(compressed_pdf)
+                                        for page_num, img in enumerate(images):
+                                            st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
 
-                                    #os.remove(temp_input_path)
-                                    #os.remove(temp_output_path)  
+                                    os.remove(temp_input_path)
+                                    os.remove(temp_output_path)  
 
-        else:
-                st.warning("Please upload a PDF file to compress.")
+                    else:
+                        st.warning("Please upload a PDF file to compress.")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Protect
