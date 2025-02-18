@@ -178,14 +178,14 @@ with st.popover("**:red[App Capabilities]**", disabled=False, use_container_widt
     st.info("""
                 
             - **View** -           It allows you to preview PDF files directly within the application.
-            - Extract       It is designed to extract text and metadata from PDF files.
-            - Merge         It lets you combine multiple PDF files into a single document.
-            - Compress      It is used to reduce the file size of PDF documents.
-            - Protect       It enables you to add password protection to your PDF files.
-            - Unlock        It allows you to remove password protection from PDF files.
-            - Rotate        It lets you change the orientation of pages within a PDF file.
-            - Resize        It tab allows you to adjust the dimensions of a PDF file.    
-            - Convert       It offers conversion options between PDF and other formats, such as word or images. 
+            - **Extract** -        It is designed to extract text and metadata from PDF files.
+            - **Merge** -          It lets you combine multiple PDF files into a single document.
+            - **Compress** -       It is used to reduce the file size of PDF documents.
+            - **Protect** -        It enables you to add password protection to your PDF files.
+            - **Unlock** -         It allows you to remove password protection from PDF files.
+            - **Rotate** -         It lets you change the orientation of pages within a PDF file.
+            - **Resize** -         It tab allows you to adjust the dimensions of a PDF file.    
+            - **Convert** -        It offers conversion options between PDF and other formats, such as word or images. 
          
             """)
 #---------------------------------------------------------------------------------------------------------------------------------
@@ -202,25 +202,25 @@ with col1:
     if st.button("**:red[View]**",use_container_width=True):
         st.session_state.current_page = "view"
 with col2:
-    if st.button("**Extract**",use_container_width=True):
+    if st.button("**:red[Extract]**",use_container_width=True):
         st.session_state.current_page = "extract"
 with col3:
-    if st.button("**Merge**",use_container_width=True):
+    if st.button("**:red[Merge]**",use_container_width=True):
         st.session_state.current_page = "merge"
 with col4:
-    if st.button("**Compress**",use_container_width=True):
+    if st.button("**:red[Compress]**",use_container_width=True):
         st.session_state.current_page = "compress"
 with col5:
-    if st.button("**Protect**",use_container_width=True):
+    if st.button("**:red[Protect]**",use_container_width=True):
         st.session_state.current_page = "protect"
 with col6:
-    if st.button("**Unlock**",use_container_width=True):
+    if st.button("**:red[Unlock]**",use_container_width=True):
         st.session_state.current_page = "unlock"
 with col7:
-    if st.button("**Rotate**",use_container_width=True):
+    if st.button("**:red[Rotate]**",use_container_width=True):
         st.session_state.current_page = "rotate"
 with col8:
-    if st.button("**Resize**",use_container_width=True):
+    if st.button("**:red[Resize]**",use_container_width=True):
         st.session_state.current_page = "resize"       
 
 page = st.session_state.current_page 
@@ -408,83 +408,93 @@ if page == "compress":
 ### Protect
 #---------------------------------------------------------------------------------------------------------------------------------
 
-with tab5:
+#with tab5:
+if page == "protect":
 
-        st.write("""
-        The **Protect** tab enables you to add password protection to your PDF files. 
-        You can set a password to prevent unauthorized access or editing of your documents.
-        """)
-        uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_protect")
-        st.divider()
+        #st.session_state.pdf_tab = "Protect" 
+        st.info("""The **Protect** tab enables you to add password protection to your PDF files. You can set a password to prevent unauthorized access or editing of your documents.""")
+        
+        col1, col2 = st.columns((0.2,0.8))
+        with col1:           
+            with st.container(border=True):
+                
+                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_protect")
+                if uploaded_file is not None:
 
-        if uploaded_file is not None:
+                    st.write(f"You have selected **{uploaded_file.name}** to protect. Please enter the password below and press **Protect** to protect the PDF.")
+                    st.divider()
+                    password = st.text_input("**Enter a password to protect your PDF**", type="password")
 
-                st.write(f"You have selected **{uploaded_file.name}** to protect. Please enter the password below and press **Protect** to protect the PDF.")
-                password = st.text_input("**Enter a password to protect your PDF**", type="password")
+                    if st.button("**Protect**"):
+                        if password:
+                            
+                            with col2:
+                                with st.container(height=650,border=True):
+                                    
+                                    pdf_reader = PdfReader(uploaded_file)
+                                    pdf_writer = PdfWriter()
+                                    for page in pdf_reader.pages:
+                                        pdf_writer.add_page(page)
+                                    with st.spinner("Protecting PDFs..."):
+                                        pdf_writer.encrypt(user_pwd=password, owner_pwd=None, use_128bit=True)
 
-                if st.button("**Protect**"):
+                                    output_pdf_io = io.BytesIO()
+                                    pdf_writer.write(output_pdf_io)
+                                    output_pdf_io.seek(0)  # Move to the start of the file
+                                    
+                                    st.success(f"Your PDF has been password protected and is ready for download.")
+                                    st.download_button(label="**📥 Download Password Protected PDF**",data=output_pdf_io,file_name="protected.pdf",mime="application/pdf")
 
-                    if password:
-                        pdf_reader = PdfReader(uploaded_file)
-                        pdf_writer = PdfWriter()
-                        for page in pdf_reader.pages:
-                            pdf_writer.add_page(page)
-                        with st.spinner("Protecting PDFs..."):
-                            pdf_writer.encrypt(user_pwd=password, owner_pwd=None, use_128bit=True)
-
-                        output_pdf = f"protected_{uploaded_file.name}"
-                        with open(output_pdf, "wb") as f:
-                            pdf_writer.write(f)
-                    
-                        with open(output_pdf, "rb") as f:
-                            st.success(f"Your PDF has been password protected and is ready for download.")
-                            st.download_button(label="**📥 Download Password Protected PDF**",data=f,file_name="protected.pdf",mime="application/pdf")
-
-                    else:
-                        st.warning("Please enter a password to protect your PDF.")
-        else:
-                st.warning("Please upload a PDF file to protect.")
+                        else:
+                            st.warning("Please enter a password to protect your PDF.")
+                else:
+                    st.warning("Please upload a PDF file to protect.")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Unlock
 #---------------------------------------------------------------------------------------------------------------------------------
 
-with tab6:
+#with tab6:
+if page == "unlock":    
 
-        st.write("""
-        The **Unlock** tab allows you to remove password protection from PDF files. 
-        If you have a secured PDF and you know the password, you can unlock it for easier access.
-        """)
-        uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_unlock")
-        st.divider()
+        #st.session_state.pdf_tab = "Unlock" 
+        st.info("""The **Unlock** tab allows you to remove password protection from PDF files. If you have a secured PDF and you know the password, you can unlock it for easier access.""")
 
-        if uploaded_file is not None:
-                
-                st.write(f"You have selected **{uploaded_file.name}** for unlock. Please enter the password below and press **Unlock** to remove the password.")
-                password = st.text_input("**Enter the password to unlock the PDF**", type="password")
+        col1, col2 = st.columns((0.2,0.8))
+        with col1:           
+            with st.container(border=True):     
+        
+                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_unlock")
+                if uploaded_file is not None:
 
-                if st.button("**Unlock**"):
+                    st.write(f"You have selected **{uploaded_file.name}** for unlock. Please enter the password below and press **Unlock** to remove the password.")
+                    st.divider()
+                    password = st.text_input("**Enter the password to unlock the PDF**", type="password")
 
-                    if uploaded_file and password:
-                        try:
-                            with pikepdf.open(uploaded_file, password=password) as pdf:
-                                with st.spinner("Unlocking PDFs..."):
-                                    output_pdf = f"unlocked_{uploaded_file.name}"
-                                pdf.save(output_pdf)
+                    if st.button("**Unlock**"):
+                        if uploaded_file and password:                           
+                        
+                            with col2:
+                                with st.container(height=650,border=True):
+                                
+                                    try:
+                                        with pikepdf.open(uploaded_file, password=password) as pdf:
+                                            with st.spinner("Unlocking PDFs..."):
+                                                output_pdf = f"unlocked_{uploaded_file.name}"
+                                                pdf.save(output_pdf)
 
-                            with open(output_pdf, "rb") as f:
-                                st.success(f"Password has been removed from the PDF and is ready for download.")
-                                st.download_button(label="**📥 Download Unlocked PDF**",data=f,file_name="unlocked.pdf",mime="application/pdf")
+                                        with open(output_pdf, "rb") as f:
+                                            st.success(f"Password has been removed from the PDF and is ready for download.")
+                                        st.download_button(label="**📥 Download Unlocked PDF**",data=f,file_name="unlocked.pdf",mime="application/pdf")
 
-                        except pikepdf._qpdf.PasswordError:
-                            st.error("Incorrect password. Please try again.")
-                        except Exception as e:
-                            st.error(f"An error occurred: {str(e)}")
-
-                    else:
-                        st.warning("Please enter a password to unlock your PDF.")
-        else:
-                st.warning("Please upload a PDF file to unlock")
+                                    except pikepdf._qpdf.PasswordError:
+                                        st.error("Incorrect password. Please try again.")
+                                    except Exception as e:
+                                        st.error(f"An error occurred: {str(e)}")
+                        else:
+                            st.warning("Please enter a password to unlock your PDF.")
+                else:
+                    st.warning("Please upload a PDF file to unlock")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Rotate
