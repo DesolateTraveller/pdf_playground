@@ -13,4 +13,7 @@ pikepdf
 poppler-utils
 docx
 pdf2docx
-pdfminer.six
+pdfminer.six==20221105
+pdfplumber==0.9.0
+nltk
+sumy
