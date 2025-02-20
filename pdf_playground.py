@@ -35,6 +35,8 @@ from pdf2image.exceptions import PDFInfoNotInstalledError,PDFPageCountError,PDFS
 #----------------------------------------
 import nltk
 nltk.download('punkt')
+if not os.path.exists(nltk.data.find("tokenizers/punkt", raise_on_error=False) or ""):
+    nltk.download("punkt")
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Title and description for your Streamlit app
 #---------------------------------------------------------------------------------------------------------------------------------
