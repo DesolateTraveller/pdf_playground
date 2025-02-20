@@ -33,8 +33,8 @@ from pdf2image import convert_from_path, convert_from_bytes
 from pdf2image.exceptions import PDFInfoNotInstalledError,PDFPageCountError,PDFSyntaxError
 #from pdfminer.high_level import extract_text
 #----------------------------------------
-#import nltk
-#nltk.download('punkt')
+import nltk
+nltk.download('punkt')
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Title and description for your Streamlit app
 #---------------------------------------------------------------------------------------------------------------------------------
