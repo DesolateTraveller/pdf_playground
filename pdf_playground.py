@@ -337,7 +337,7 @@ if page == "extract":
                         st.write(f"📄 **Total Pages in PDF:** {total_pages}")
                         st.divider()
                         
-                        extract_type = st.radio("**:blue[Choose Extraction Type]**", ["Text", "Tables"],horizontal=True)
+                        extract_type = st.radio("**:blue[Extraction Type]**", ["Text", "Tables"],horizontal=True)
                         page_selection = st.radio("**:blue[Extract from]**", ["All Pages", "Specific Page"],horizontal=True)
                         if page_selection == "Specific Page":
                             selected_page = st.number_input("**:blue[Enter page number]**", min_value=1, max_value=total_pages, value=1)
