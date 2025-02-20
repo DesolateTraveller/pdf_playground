@@ -35,6 +35,7 @@ from pdf2image.exceptions import PDFInfoNotInstalledError,PDFPageCountError,PDFS
 #----------------------------------------
 import nltk
 nltk.download('punkt')
+nltk.download('punkt_tab')
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Title and description for your Streamlit app
 #---------------------------------------------------------------------------------------------------------------------------------
