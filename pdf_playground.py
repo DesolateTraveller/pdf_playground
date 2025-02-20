@@ -20,7 +20,7 @@ from PIL import Image
 #----------------------------------------
 from io import BytesIO
 #----------------------------------------
-import fitz
+import fitz 
 import pikepdf
 import pdfplumber
 from docx import Document
@@ -181,21 +181,29 @@ def convert_pdf_to_images(pdf_bytes):
     return convert_from_bytes(pdf_bytes)
 
 @st.cache_data(ttl="2h")
-def extract_text_from_pdf(uploaded_file):
+def extract_text_from_pdf(uploaded_file, start_page=None, end_page=None):
+    """Extract text from an entire PDF, a specific page, or a range of pages."""
     text = ""
     with pdfplumber.open(uploaded_file) as pdf:
-        for page in pdf.pages:
-            extracted_text = page.extract_text()
+        total_pages = len(pdf.pages)
+        start_page = max(0, (start_page - 1) if start_page else 0)
+        end_page = min(total_pages, end_page if end_page else total_pages)
+
+        for i in range(start_page, end_page):
+            extracted_text = pdf.pages[i].extract_text()
             if extracted_text:
+                text += f"\n--- Page {i+1} ---\n"  # Properly format text with page numbers
                 text += extracted_text + "\n"
-    return text
+    return text.strip()
 
 @st.cache_data(ttl="2h")
-def summarize_text(text, num_sentences=5):
+def summarize_text(text, num_sentences):
+    """Summarizes extracted text using LSA algorithm."""
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
     summarizer = LsaSummarizer()
-    summary = summarizer(parser.document, num_sentences)
-    return " ".join(str(sentence) for sentence in summary)
+    summary_sentences = summarizer(parser.document, num_sentences)
+    summary = "\n".join(str(sentence) for sentence in summary_sentences)
+    return summary
 
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Main app
@@ -206,17 +214,21 @@ def summarize_text(text, num_sentences=5):
 with st.popover("**:red[App Capabilities]**", disabled=False, use_container_width=True): 
     st.info("""
                 
-            - **View** -           It allows you to preview PDF files directly within the application.
-            - **Extract** -        It is designed to extract text and metadata from PDF files.
-            - **Merge** -          It lets you combine multiple PDF files into a single document.
-            - **Compress** -       It is used to reduce the file size of PDF documents.
-            - **Protect** -        It enables you to add password protection to your PDF files.
-            - **Unlock** -         It allows you to remove password protection from PDF files.
-            - **Rotate** -         It lets you change the orientation of pages within a PDF file.
-            - **Resize** -         It tab allows you to adjust the dimensions of a PDF file.    
-            - **Convert** -        It offers conversion options between PDF and other formats, such as word or images. 
+            - **View** -                    It allows you to preview PDF files directly within the application.
+            - **Extract** -                 It is designed to extract text and metadata from PDF files.
+            - **Merge** -                   It lets you combine multiple PDF files into a single document.
+            - **Compress/Resize** -         It is used to reduce the file size of PDF documents.
+            - **Protect** -                 It enables you to add password protection to your PDF files.
+            - **Unlock** -                  It allows you to remove password protection from PDF files.
+            - **Rotate** -                  It lets you change the orientation of pages within a PDF file.
+            - **Resize** -                  It tab allows you to adjust the dimensions of a PDF file.    
+            - **Summarization** -           It generate summary of uploaded pdf without using Generative AI. 
          
             """)
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------
+                  
     
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Content
@@ -271,13 +283,13 @@ if page == "view":
             col1, col2, col3 = st.columns((0.2,0.6,0.2))
             with col1:           
                 with st.container(border=True):
-                    uploaded_file = st.file_uploader("**Choose PDF file**",type="pdf",key="file_uploader_preview")
+                    uploaded_file = st.file_uploader("**:blue[Choose PDF file]**",type="pdf",key="file_uploader_preview")
                     if uploaded_file is not None:
                         st.success("PDFs loaded successfully!")
 
                         try:
                             with col2:
-                                with st.container(border=True):
+                                with st.container(height=650,border=True):
                                     
                                     images = pdf_to_images(uploaded_file)
                                     if images and isinstance(images, list):
@@ -313,20 +325,21 @@ if page == "extract":
             col1, col2 = st.columns((0.2,0.8))
             with col1:           
                 with st.container(border=True):            
-                    uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf", key="file_uploader_extract")
+                    uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf", key="file_uploader_extract")
                     if uploaded_file is not None:
+                        st.success("PDFs loaded successfully!")
                         with pdfplumber.open(uploaded_file) as pdf:
                             total_pages = len(pdf.pages)
                             
                         #st.success("Text extracted successfully!")
-                        st.write(f"You have selected **{uploaded_file.name}** for text extraction.")
+                        #st.write(f"You have selected **{uploaded_file.name}** for text extraction.")
                         st.write(f"📄 **Total Pages in PDF:** {total_pages}")
                         st.divider()
                         
-                        extract_type = st.radio("**Choose Extraction Type**", ["Text", "Tables"])
-                        page_selection = st.radio("**Extract from:**", ["All Pages", "Specific Page"])
+                        extract_type = st.radio("**:blue[Choose Extraction Type]**", ["Text", "Tables"])
+                        page_selection = st.radio("**:blue[Extract from]**", ["All Pages", "Specific Page"])
                         if page_selection == "Specific Page":
-                            selected_page = st.number_input("Enter page number:", min_value=1, max_value=total_pages, value=1)
+                            selected_page = st.number_input("**:blue[Enter page number]**", min_value=1, max_value=total_pages, value=1)
 
                         if st.button("**Extract**"):
                             with col2:
@@ -345,7 +358,7 @@ if page == "extract":
 
                                                 st.text_area("Extracted Text", value=extracted_data, height=600)
                                                 text_file = io.BytesIO(extracted_data.encode("utf-8"))
-                                                st.download_button(label="**📥 Download Extracted Text**",data=text_file,file_name="extracted_text.txt",mime="text/plain")
+
 
                                             elif extract_type == "Tables":
                                                 with st.spinner("Extracting tables..."):
@@ -363,20 +376,19 @@ if page == "extract":
                                             
                                                         csv_data = "\n".join([",".join(map(str, row)) for table in tables for row in table])
                                                         csv_file = io.BytesIO(csv_data.encode("utf-8"))
-                                                        st.download_button(label="**📥 Download Extracted Tables(.csv)**",data=csv_file,file_name="extracted_tables.csv",mime="text/csv")
-                                                    
+                                                        
+                                             
                                                     else:
                                                         st.warning("⚠️ No tables found in the selected page(s).")                      
-                        #try:
-                            #with col2:
-                                #with st.container(height=650,border=True):
-                                    #with st.spinner("Extracting text..."):
-                                        #text = extract_text(uploaded_file)
-                                        #st.text_area("", value=text, height=7000)
-                                #st.download_button(label="**📥 Download Extracted Text**",data=text,file_name="extracted.txt",mime="application/txt") 
                                                     
                                     except Exception as e:
                                         st.error(f"An error occurred while processing the PDF: {e}")
+                                
+                                if extract_type == "Text":    
+                                    st.download_button(label="**📥 Download Extracted Text (.txt)**",data=text_file,file_name="extracted_text.txt",mime="text/plain")   
+                                elif extract_type == "Tables":
+                                    st.download_button(label="**📥 Download Extracted Tables (.csv)**",data=csv_file,file_name="extracted_tables.csv",mime="text/csv")
+                                        
                     else:
                         st.warning("Please upload a PDF file to extract.")
 
@@ -394,10 +406,9 @@ if page == "merge":
             with col1:           
                 with st.container(border=True):              
             
-                    uploaded_files = st.file_uploader("**Choose PDF files**", type="pdf", accept_multiple_files=True)
+                    uploaded_files = st.file_uploader("**:blue[Choose PDF files]**", type="pdf", accept_multiple_files=True)
                     if uploaded_files:
-                    
-                        st.write(f"You have selected **{len(uploaded_files)} PDF file(s)** for merging.")
+                        st.success(f"You have selected **{len(uploaded_files)} PDF file(s)** for merging.")
                         if st.button("**Merge PDFs**"):
                             with st.spinner("Merging PDFs..."):
                                 merged_pdf = merge_pdfs(uploaded_files)
@@ -411,6 +422,7 @@ if page == "merge":
                                     images = pdf_to_images(merged_pdf)
                                     for page_num, img in enumerate(images):
                                         st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
+                                
                                 st.download_button(label="**📥 Download Merged PDF**",data=merged_pdf,file_name="merged_pdf.pdf",mime="application/pdf")
                     
                     else:
@@ -434,12 +446,12 @@ if page == "compress":
     with col1:           
             with st.container(border=True): 
                 
-                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_resize")
+                uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf",key="file_uploader_resize")
                 if uploaded_file is not None:
                 
-                    st.write(f"You have selected **{uploaded_file.name}** for resize. Please choose the scale factor and press **Resize/Rescale**.")
+                    st.success(f"You have selected **{uploaded_file.name}** for compress/resize. Please choose the scale factor and press **Compress/Resize**.")
                     st.divider()
-                    scale_factor = st.slider("**select scale factor**", 0.1, 2.0, 0.8, 0.1)
+                    scale_factor = st.slider("**:blue[Select scale factor]**", 0.1, 2.0, 0.8, 0.1)
 
                     if st.button("**Compress/Resize**"): 
                         with col2:
@@ -475,12 +487,12 @@ if page == "protect":
         with col1:           
             with st.container(border=True):
                 
-                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_protect")
+                uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf",key="file_uploader_protect")
                 if uploaded_file is not None:
 
-                    st.write(f"You have selected **{uploaded_file.name}** to protect. Please enter the password below and press **Protect** to protect the PDF.")
+                    st.success(f"You have selected **{uploaded_file.name}** to protect. Please enter the password below and press **Protect** to protect the PDF.")
                     st.divider()
-                    password = st.text_input("**Enter a password to protect your PDF**", type="password")
+                    password = st.text_input("**:blue[Enter a password to protect your PDF]**", type="password")
 
                     if st.button("**Protect**"):
                         if password:
@@ -521,12 +533,12 @@ if page == "unlock":
         with col1:           
             with st.container(border=True):     
         
-                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_unlock")
+                uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf",key="file_uploader_unlock")
                 if uploaded_file is not None:
 
-                    st.write(f"You have selected **{uploaded_file.name}** for unlock. Please enter the password below and press **Unlock** to remove the password.")
+                    st.success(f"You have selected **{uploaded_file.name}** for unlock. Please enter the password below and press **Unlock** to remove the password.")
                     st.divider()
-                    password = st.text_input("**Enter the password to unlock the PDF**", type="password")
+                    password = st.text_input("**:blue[Enter the password to unlock the PDF]**", type="password")
 
                     if st.button("**Unlock**"):
                         if uploaded_file and password:                           
@@ -568,12 +580,12 @@ if page == "rotate":
         with col1:           
             with st.container(border=True): 
                 
-                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf",key="file_uploader_rotate")
+                uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf",key="file_uploader_rotate")
                 if uploaded_file is not None:
                 
-                    st.write(f"You have selected **{uploaded_file.name}** for rotate. Please choose the rotation angle and press **Rotate** to make rotation.")
+                    st.success(f"You have selected **{uploaded_file.name}** for rotate. Please choose the rotation angle and press **Rotate** to make rotation.")
                     st.divider()
-                    rotation_angle = st.slider("**Select rotation angle**", 0, 360, 90, 90)
+                    rotation_angle = st.slider("**:blue[Select rotation angle]**", 0, 360, 90, 90)
 
                     if st.button("**Rotate**"): 
                         with col2:
@@ -616,12 +628,12 @@ if page == "convert":
         with col1:           
             with st.container(border=True): 
         
-                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf", key="file_uploader_convert")
+                uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf", key="file_uploader_convert")
                 if uploaded_file is not None:
 
                     st.success(f"You have selected **{uploaded_file.name}** for conversion.")
                     st.divider()
-                    conversion_type = st.selectbox("**Choose the output format**", ("Word Document (.docx)", "Plain Text (.txt)"))
+                    conversion_type = st.selectbox("**:blue[Choose the output format]**", ("Word Document (.docx)", "Plain Text (.txt)"))
                     
                     if st.button("**Convert**"):
                         with col2:
@@ -656,7 +668,7 @@ if page == "convert":
                                             text_file_io.seek(0)                               
                                 
                                     st.success("PDF converted to Text successfully!")
-                            st.download_button(label="**📥 Download Text File**", data=text_file_io, file_name=f"{output_file_name}.txt", mime="text/plain")
+                                    st.download_button(label="**📥 Download Text File**", data=text_file_io, file_name=f"{output_file_name}.txt", mime="text/plain")
 
                 else:
                     st.warning("Please upload a PDF file to convert.")
@@ -674,29 +686,43 @@ if page == "summary":
         with col1:           
             with st.container(border=True): 
         
-                uploaded_file = st.file_uploader("**Choose PDF file**", type="pdf", key="file_uploader_convert")
+                uploaded_file = st.file_uploader("**:blue[Choose PDF file]**", type="pdf", key="file_uploader_convert")
                 if uploaded_file is not None:
-                    
+                        
+                    with pdfplumber.open(uploaded_file) as pdf:
+                        total_pages = len(pdf.pages)
                     st.success(f"📂 File uploaded: **{uploaded_file.name}**")
                     st.divider()
-                    num_sentences = st.slider("Select number of sentences for summary:", 1, 10, 5)
                     
+                    #num_sentences = st.slider(":blue[Select number of sentences for summary]", 1, 10, 5)
+                    summary_choice = st.radio("**:blue[Choose to summarize]**", ["All Pages", "Specific Page", "Range of Pages"])
+
+                    start_page, end_page = None, None
+                    if summary_choice == "Specific Page":
+                        start_page = st.number_input("**:blue[Enter page number]**", min_value=1, max_value=total_pages, value=1)
+                        end_page = start_page  # Only one page selected
+                    elif summary_choice == "Range of Pages":
+                        start_page = st.number_input("**:blue[Start Page]**", min_value=1, max_value=total_pages, value=1)
+                        end_page = st.number_input("**:blue[End Page]**", min_value=start_page, max_value=total_pages, value=total_pages)
+
+                    num_sentences = 10
                     if st.button("**Summarization**"):
                         with col2:
                             with st.container(height=650,border=True):  
                                 
                                 with st.spinner("Extracting text..."):
                                     with st.spinner("Summarizing..."):
-                                        extracted_text = extract_text_from_pdf(uploaded_file)
+                                        extracted_text = extract_text_from_pdf(uploaded_file, start_page, end_page)
                                         summary = summarize_text(extracted_text, num_sentences)
                                         
-                                        st.text_area("", summary, height=200)
+                                        formatted_summary = f"📄 **Summary of {uploaded_file.name}**\n\n{summary}"
+                                        st.text_area("", formatted_summary, height=200)
                                         summary_file = io.BytesIO(summary.encode("utf-8"))
                                         
-                            st.download_button(label="📥 Download Summary",data=summary_file,file_name="summary.txt",mime="text/plain")
+                            st.download_button(label="**📥 Download Summary (.txt)**",data=summary_file,file_name="summary.txt",mime="text/plain")
                                 
-                    else:
-                        st.warning("No text could be extracted from the PDF.")
+                    #else:
+                        #st.warning("No text could be extracted from the PDF.")
 
                 else:
                     st.warning("Please upload a PDF file to summarize.")                                
