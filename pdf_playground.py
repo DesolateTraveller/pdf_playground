@@ -64,7 +64,7 @@ st.markdown(
     }
     </style>
     <div class="title-large">PDF Playground</div>
-    <div class="title-small">Play with PDF | version : 0.2</div>
+    <div class="title-small">Play with PDF | v0.2</div>
     """,
     unsafe_allow_html=True
 )
