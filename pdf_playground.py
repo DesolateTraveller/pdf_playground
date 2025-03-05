@@ -290,12 +290,12 @@ if page == "view":
 
                         try:
                             with col2:
-                                with st.container(height=650,border=True):
+                                with st.container(border=True):
                                     
                                     images = pdf_to_images(uploaded_file)
                                     if images and isinstance(images, list):
                                         for i, image in enumerate(images):
-                                            st.image(image, caption=f'Page {i + 1}', use_column_width=True)
+                                            st.image(image, caption=f'Page {i + 1}', use_container_width=True)
                                     else:
                                         st.warning("No images were generated from the PDF.")
 
@@ -344,7 +344,7 @@ if page == "extract":
 
                         if st.button("**Extract**"):
                             with col2:
-                                with st.container(height=650, border=True):
+                                with st.container(border=True):
                                     
                                     try:
                                         with pdfplumber.open(uploaded_file) as pdf:
@@ -422,7 +422,7 @@ if page == "merge":
                                     merged_pdf.seek(0)
                                     images = pdf_to_images(merged_pdf)
                                     for page_num, img in enumerate(images):
-                                        st.image(img, caption=f"Page {page_num + 1}", use_column_width=True)
+                                        st.image(img, caption=f"Page {page_num + 1}", use_container_width=True)
                                 
                                 st.download_button(label="**📥 Download Merged PDF**",data=merged_pdf,file_name="merged_pdf.pdf",mime="application/pdf")
                     
@@ -456,7 +456,7 @@ if page == "compress":
 
                     if st.button("**Compress/Resize**"): 
                         with col2:
-                            with st.container(height=650,border=True):       
+                            with st.container(border=True):       
                                 
                                 try:
                                     images = pdf_to_images(uploaded_file)
@@ -499,7 +499,7 @@ if page == "protect":
                         if password:
                             
                             with col2:
-                                with st.container(height=650,border=True):
+                                with st.container(border=True):
                                     
                                     pdf_reader = PdfReader(uploaded_file)
                                     pdf_writer = PdfWriter()
@@ -545,7 +545,7 @@ if page == "unlock":
                         if uploaded_file and password:                           
                         
                             with col2:
-                                with st.container(height=650,border=True):
+                                with st.container(border=True):
                                 
                                     try:
                                         with pikepdf.open(uploaded_file, password=password) as pdf:
@@ -590,7 +590,7 @@ if page == "rotate":
 
                     if st.button("**Rotate**"): 
                         with col2:
-                            with st.container(height=650,border=True):       
+                            with st.container(border=True):       
 
                                 reader = PdfReader(uploaded_file)
                                 writer = PdfWriter()
@@ -638,7 +638,7 @@ if page == "convert":
                     
                     if st.button("**Convert**"):
                         with col2:
-                            with st.container(height=650,border=True):       
+                            with st.container(border=True):       
 
                                 output_file_name = os.path.splitext(uploaded_file.name)[0]
                                 
@@ -709,7 +709,7 @@ if page == "summary":
                     num_sentences = 10
                     if st.button("**Summarization**"):
                         with col2:
-                            with st.container(height=650,border=True):  
+                            with st.container(border=True):  
                                 
                                 with st.spinner("Extracting text..."):
                                     with st.spinner("Summarizing..."):
