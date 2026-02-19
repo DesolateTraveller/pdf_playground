@@ -109,7 +109,7 @@ st.markdown(
     </style>
 
     <div class="footer">
-        <p>© 2025 | Created by : <span class="highlight">Avijit Chakraborty</span> | <a href="mailto:avijit.mba18@gmail.com"> 📩 </a></p> <span class="highlight">Thank you for visiting the app | Unauthorized uses or copying is strictly prohibited | For best view of the app, please zoom out the browser to 75%.</span>
+        <p>© 2026 | Created by : <span class="highlight">Avijit Chakraborty</span> <a href="mailto:avijit.mba18@gmail.com"> 📩 </a> | <span class="highlight">Thank you for visiting the app | Unauthorized uses or copying is strictly prohibited | For best view of the app, please zoom out the browser to 75%.</span> </p>
     </div>
     """,
     unsafe_allow_html=True)
@@ -779,4 +779,5 @@ if page == "summary":
                                     #os.remove(text_file_path)
 
                                 #os.remove(pdf_file_path)
+
 
