@@ -24,7 +24,7 @@ import fitz
 import pikepdf
 import pdfplumber
 from docx import Document
-from pdf2docx import Converter
+#from pdf2docx import Converter
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
@@ -43,7 +43,114 @@ st.set_page_config(page_title="PDF Playground | v0.2",
                     layout="wide",
                     page_icon="📘",            
                     initial_sidebar_state="collapsed")
-#----------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------
+### Login Page | Streamlit app
+#---------------------------------------------------------------------------------------------------------------------------------
+
+             
+#---------------------------------------------------------------------------------------------------------------------------------
+### CSS
+#---------------------------------------------------------------------------------------------------------------------------------
+st.markdown("""
+    <style>
+    .centered-info {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 15px;
+        color: #007BFF; 
+        background-color: #FFFFFF; 
+        border-radius: 5px;
+        border: 1px solid #007BFF;
+        margin: 0px;
+        padding: 5px 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <style>
+    /* Card styling (matches your screenshot) */
+    .card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e1e5eb;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: #66b2ff;
+    }
+    .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #1a365d;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-icon {
+        font-size: 1.8rem;
+    }
+    .card-list {
+        padding-left: 0;
+        margin-top: 12px;
+    }
+    .card-list li {
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        color: #4a5568;
+    }
+    .card-list li::before {
+        content: "✅";
+        margin-right: 8px;
+        color: #3182ce;
+    }
+
+    /* Home button style (top-left) */
+    .home-btn {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #2d3748;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .home-btn:hover {
+        background: #edf2f7;
+        color: #1a365d;
+    }
+
+    /* Sidebar-like input panel */
+    .input-panel {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+#---------------------------------------------------------------------------------------------------------------------------------
+### Description for your Streamlit app
+#---------------------------------------------------------------------------------------------------------------------------------
 st.markdown(
     """
     <style>
@@ -83,6 +190,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 #----------------------------------------
 st.markdown(
     """
@@ -113,11 +221,11 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Functions & Definitions
 #---------------------------------------------------------------------------------------------------------------------------------
 
-@st.cache_data(ttl="2h")
 def pdf_to_images(pdf_file):
     doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
     images = []
@@ -128,7 +236,6 @@ def pdf_to_images(pdf_file):
         images.append(img)
     return images
 
-@st.cache_data(ttl="2h")
 def merge_pdfs(pdf_files):
     merger = PdfMerger()
     for pdf_file in pdf_files:
@@ -139,7 +246,6 @@ def merge_pdfs(pdf_files):
     merged_pdf.seek(0)
     return merged_pdf
 
-@st.cache_data(ttl="2h")
 def compress_pdf(input_pdf, compression_factor=0.5):
     """Compress a PDF file and return it as bytes."""
     
@@ -173,18 +279,15 @@ def compress_pdf(input_pdf, compression_factor=0.5):
     output_stream.seek(0)
     return output_stream.getvalue()  # Return compressed PDF as bytes
 
-@st.cache_data(ttl="2h")
 def pdf_to_images_bytes(pdf_bytes):
     images = convert_from_bytes(pdf_bytes)
     return images
 
-@st.cache_data(ttl="2h")
 def extract_metadata(pdf_file):
     pdf_reader = PdfReader(pdf_file)
     metadata = pdf_reader.metadata
     return metadata
 
-@st.cache_data(ttl="2h")
 def extract_text(pdf_file):
     pdf_reader = PdfReader(pdf_file)
     text = ""
@@ -192,11 +295,9 @@ def extract_text(pdf_file):
         text += page.extract_text()
     return text
 
-@st.cache_data(ttl="2h")
 def convert_pdf_to_images(pdf_bytes):
     return convert_from_bytes(pdf_bytes)
 
-@st.cache_data(ttl="2h")
 def extract_text_from_pdf(uploaded_file, start_page=None, end_page=None):
     """Extract text from an entire PDF, a specific page, or a range of pages."""
     text = ""
@@ -212,7 +313,6 @@ def extract_text_from_pdf(uploaded_file, start_page=None, end_page=None):
                 text += extracted_text + "\n"
     return text.strip()
 
-@st.cache_data(ttl="2h")
 def summarize_text(text, num_sentences):
     """Summarizes extracted text using LSA algorithm."""
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
@@ -244,48 +344,88 @@ with st.popover("**:red[App Capabilities]**", disabled=False, use_container_widt
 
 #---------------------------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------
-                  
-    
-#---------------------------------------------------------------------------------------------------------------------------------
-### Content
-#---------------------------------------------------------------------------------------------------------------------------------
+                      
+# Initialize session state
+if 'page' not in st.session_state:
+    st.session_state.page = 'home'
 
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "view"
+def go_home():
+    st.session_state.page = 'home'
 
-col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns(9)
-with col1:
-    if st.button("**:red[View]**",use_container_width=True):
-        st.session_state.current_page = "view"
-with col2:
-    if st.button("**:red[Extract]**",use_container_width=True):
-        st.session_state.current_page = "extract"
-with col3:
-    if st.button("**:red[Merge]**",use_container_width=True):
-        st.session_state.current_page = "merge"
-with col4:
-    if st.button("**:red[Compress/Resize]**",use_container_width=True):
-        st.session_state.current_page = "compress"
-with col5:
-    if st.button("**:red[Protect]**",use_container_width=True):
-        st.session_state.current_page = "protect"
-with col6:
-    if st.button("**:red[Unlock]**",use_container_width=True):
-        st.session_state.current_page = "unlock"
-with col7:
-    if st.button("**:red[Rotate]**",use_container_width=True):
-        st.session_state.current_page = "rotate"
-with col8:
-    if st.button("**:red[Convert]**",use_container_width=True):
-        st.session_state.current_page = "convert"       
-with col9:
-    if st.button("**:red[Summarization]**",use_container_width=True):
-        st.session_state.current_page = "summary"  
+#---------------------------------------------------------------------------------------------------------------------------------
+if st.session_state.page == 'home':
+
+    st.divider()
+    cols = st.columns(9)
+
+    with cols[0]:
         
-page = st.session_state.current_page 
-st.divider()
-#tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9  = st.tabs(["**View**","**Extract**","**Merge**","**Compress**","**Protect**","**Unlock**","**Rotate**","**Resize**","**Convert**"])
-     
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> View </div>
+                <ul class="card-list">
+                    <li>It allows you to preview PDF files directly within the application.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_view", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_view'
+            st.rerun()
+
+    with cols[1]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Extract </div>
+                <ul class="card-list">
+                    <li>It is designed to extract text and metadata from PDF files.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_ext", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_ext'
+            st.rerun()     
+
+    with cols[2]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Merge </div>
+                <ul class="card-list">
+                    <li>It lets you combine multiple PDF files into a single document.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_mer", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_mer'
+            st.rerun()
+
+    with cols[3]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Compress/Resize </div>
+                <ul class="card-list">
+                    <li>It is help to reduce the file size of upload PDF documents.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_comp", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_comp'
+            st.rerun()   
+  
 #---------------------------------------------------------------------------------------------------------------------------------
 ### View
 #---------------------------------------------------------------------------------------------------------------------------------
@@ -779,5 +919,3 @@ if page == "summary":
                                     #os.remove(text_file_path)
 
                                 #os.remove(pdf_file_path)
-
-
