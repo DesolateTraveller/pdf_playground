@@ -425,7 +425,58 @@ if st.session_state.page == 'home':
         if st.button("**Click to Enter**", key="btn_pdf_comp", use_container_width=True, type="primary"):
             st.session_state.page = 'pdf_comp'
             st.rerun()   
-  
+
+    with cols[4]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Protect </div>
+                <ul class="card-list">
+                    <li>It is help to reduce the file size of upload PDF documents.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_pro", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_pro'
+            st.rerun()  
+
+    with cols[5]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Unlock </div>
+                <ul class="card-list">
+                    <li>It allows you to remove password protection from PDF files.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_un", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_un'
+            st.rerun()     
+
+    with cols[6]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Rotate </div>
+                <ul class="card-list">
+                    <li>It lets you change the orientation of pages within a PDF file.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_rot", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_rot'
+            st.rerun()     
+                                          
 #---------------------------------------------------------------------------------------------------------------------------------
 ### View
 #---------------------------------------------------------------------------------------------------------------------------------
