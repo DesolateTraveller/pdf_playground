@@ -325,23 +325,6 @@ def summarize_text(text, num_sentences):
 ### Main app
 #---------------------------------------------------------------------------------------------------------------------------------
 
-#stats_expander = st.expander("**:blue[App Capabilities]**", expanded=False)
-#with stats_expander:
-with st.popover("**:red[App Capabilities]**", disabled=False, use_container_width=True): 
-    st.info("""
-                
-            - **View** -                    It allows you to preview PDF files directly within the application.
-            - **Extract** -                 It is designed to extract text and metadata from PDF files.
-            - **Merge** -                   It lets you combine multiple PDF files into a single document.
-            - **Compress/Resize** -         It is used to reduce the file size of PDF documents.
-            - **Protect** -                 It enables you to add password protection to your PDF files.
-            - **Unlock** -                  It allows you to remove password protection from PDF files.
-            - **Rotate** -                  It lets you change the orientation of pages within a PDF file.
-            - **Resize** -                  It tab allows you to adjust the dimensions of a PDF file.    
-            - **Summarization** -           It generate summary of uploaded pdf without using Generative AI. 
-         
-            """)
-
 #---------------------------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------
                       
@@ -476,13 +459,70 @@ if st.session_state.page == 'home':
         if st.button("**Click to Enter**", key="btn_pdf_rot", use_container_width=True, type="primary"):
             st.session_state.page = 'pdf_rot'
             st.rerun()     
-                                          
+
+    with cols[7]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Resize </div>
+                <ul class="card-list">
+                    <li>It tab allows you to adjust the dimensions of a PDF file.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_res", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_res'
+            st.rerun() 
+            
+    with cols[8]:
+        
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📘</span> Summarization </div>
+                <ul class="card-list">
+                    <li>It generate summary of uploaded pdf without using Generative AI.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button("**Click to Enter**", key="btn_pdf_sum", use_container_width=True, type="primary"):
+            st.session_state.page = 'pdf_sum'
+            st.rerun() 
+                                                      
 #---------------------------------------------------------------------------------------------------------------------------------
 ### View
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab1:
-if page == "view":
+#if page == "view":
+elif st.session_state.page == 'pdf_view':
+    
+            #st.divider()
+            
+            # ← Home button (top-left)
+            col_home, title= st.columns([1,15,])
+            with col_home:
+                if st.button("← Home", key="home_fd", type="secondary", use_container_width=True):
+                    go_home()
+                    st.rerun()
+
+            with title:
+                st.markdown("""
+                <style>
+                .banner {
+                    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+                    border-radius: 12px;padding: 5px;margin: 5px 0;border: 1px solid rgba(0, 86, 179, 0.15);text-align: center;
+                    font-size: 1.15rem;color: #0056b3;font-weight: 600;}
+                </style>
+                <div class="banner">
+                    PDF Playground
+                </div>
+                """, unsafe_allow_html=True)    
 
             #st.session_state.pdf_tab = "View"
             st.info("""The **View** tab allows you to preview PDF files directly within the application. You can upload a PDF and view its content without any external software.""")
