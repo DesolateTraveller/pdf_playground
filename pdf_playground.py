@@ -33,9 +33,9 @@ from pdf2image import convert_from_path, convert_from_bytes
 from pdf2image.exceptions import PDFInfoNotInstalledError,PDFPageCountError,PDFSyntaxError
 #from pdfminer.high_level import extract_text
 #----------------------------------------
-import nltk
-nltk.download('punkt')
-nltk.download('punkt_tab')
+#import nltk
+#nltk.download('punkt')
+#nltk.download('punkt_tab')
 #---------------------------------------------------------------------------------------------------------------------------------
 ### Title and description for your Streamlit app
 #---------------------------------------------------------------------------------------------------------------------------------
@@ -960,4 +960,5 @@ elif st.session_state.page == 'pdf_sum':
                     st.warning("Please upload a PDF file to summarize.")                                
                  
 #---------------------------------------------------------------------------------------------------------------------------------
+
 
