@@ -833,7 +833,7 @@ elif st.session_state.page == 'pdf_rot':
 
 #with tab9:
 #if page == "convert":
-elif st.session_state.page == 'pdf_rot':
+elif st.session_state.page == 'pdf_con':
 
         st.markdown("---")
         col_home, title= st.columns([2,15,])
