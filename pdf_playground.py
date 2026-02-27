@@ -338,162 +338,93 @@ def go_home():
 #---------------------------------------------------------------------------------------------------------------------------------
 if st.session_state.page == 'home':
 
-    st.divider()
-    cols = st.columns(9)
+    st.markdown("""
+    <style>
+    .banner {
+        background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+        border-radius: 32px;
+        padding: 15px;
+        margin: 25px 0;
+        border: 1px solid rgba(0, 86, 179, 0.15);
+        text-align: center;
+        font-size: 1.15rem;
+        color: #0056b3;
+        font-weight: 600;
+    }
+    </style>
 
-    with cols[0]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> View </div>
-                <ul class="card-list">
-                    <li>It allows you to preview PDF files directly within the application.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_view", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_view'
-            st.rerun()
+    <div class="banner">
+        Click the cards below to access different sections and explore the following features
+    </div>
+    """, unsafe_allow_html=True)
 
-    with cols[1]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Extract </div>
-                <ul class="card-list">
-                    <li>It is designed to extract text and metadata from PDF files.</li>
-                </ul>
+    # Helper function to create a uniform card to avoid code repetition
+    def render_tool_card(col, title, icon, description, page_key, button_key):
+        with col:
+            st.markdown(f"""
+            <div class="card" style="
+                border: 1px solid #e0e0e0; 
+                border-radius: 12px; 
+                padding: 20px; 
+                height: 100%; 
+                background-color: #ffffff;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                transition: transform 0.2s, box-shadow 0.2s;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            ">
+                <div>
+                    <div class="card-title" style="
+                        font-size: 1.2em; 
+                        font-weight: 700; 
+                        margin-bottom: 12px; 
+                        color: #2c3e50;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <span style="font-size: 1.4em;">{icon}</span> {title}
+                    </div>
+                    <ul class="card-list" style="
+                        list-style: none; 
+                        padding: 0; 
+                        margin: 0; 
+                        font-size: 0.9em; 
+                        color: #555;
+                        line-height: 1.5;
+                    ">
+                        <li>{description}</li>
+                    </ul>
+                </div>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_ext", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_ext'
-            st.rerun()     
-
-    with cols[2]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Merge </div>
-                <ul class="card-list">
-                    <li>It lets you combine multiple PDF files into a single document.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_mer", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_mer'
-            st.rerun()
-
-    with cols[3]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Compress/Resize </div>
-                <ul class="card-list">
-                    <li>It is help to reduce the file size of upload PDF documents.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_comp", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_comp'
-            st.rerun()   
-
-    with cols[4]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Protect </div>
-                <ul class="card-list">
-                    <li>It is help to reduce the file size of upload PDF documents.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_pro", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_pro'
-            st.rerun()  
-
-    with cols[5]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Unlock </div>
-                <ul class="card-list">
-                    <li>It allows you to remove password protection from PDF files.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_un", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_un'
-            st.rerun()     
-
-    with cols[6]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Rotate </div>
-                <ul class="card-list">
-                    <li>It lets you change the orientation of pages within a PDF file.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_rot", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_rot'
-            st.rerun()     
-
-    with cols[7]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Resize </div>
-                <ul class="card-list">
-                    <li>It tab allows you to adjust the dimensions of a PDF file.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_res", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_res'
-            st.rerun() 
+            """, unsafe_allow_html=True)
             
-    with cols[8]:
-        
-        st.markdown(
-            """
-            <div class="card">
-                <div class="card-title"><span class="card-icon">📘</span> Summarization </div>
-                <ul class="card-list">
-                    <li>It generate summary of uploaded pdf without using Generative AI.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button("**Click to Enter**", key="btn_pdf_sum", use_container_width=True, type="primary"):
-            st.session_state.page = 'pdf_sum'
-            st.rerun() 
-                                                      
+            if st.button("**🚀 Click to Enter**", key=button_key, use_container_width=True, type="primary"):
+                st.session_state.page = page_key
+                st.rerun()
+
+    # --- Row 1: First 5 Tools ---
+    cols_row1 = st.columns(5)
+
+    render_tool_card(cols_row1[0], "View", "👁️", "Preview PDF files directly within the application.", 'pdf_view', 'btn_pdf_view')
+    render_tool_card(cols_row1[1], "Extract", "📤", "Extract text and metadata from PDF files efficiently.", 'pdf_ext', 'btn_pdf_ext')
+    render_tool_card(cols_row1[2], "Merge", "🔗", "Combine multiple PDF files into a single document.", 'pdf_mer', 'btn_pdf_mer')
+    render_tool_card(cols_row1[3], "Compress", "🗜️", "Reduce the file size of uploaded PDF documents.", 'pdf_comp', 'btn_pdf_comp')
+    render_tool_card(cols_row1[4], "Protect", "🔒", "Add password protection to secure your PDF files.", 'pdf_pro', 'btn_pdf_pro')
+
+    st.write("") # Spacer between rows
+
+    # --- Row 2: Remaining 4 Tools ---
+    # We use 5 columns again but leave the last one empty to center the 4 cards, 
+    # OR just use 4 columns. Let's use 4 columns for better width usage.
+    cols_row2 = st.columns(4)
+
+    render_tool_card(cols_row2[0], "Unlock", "🔓", "Remove password protection from PDF files.", 'pdf_un', 'btn_pdf_un')
+    render_tool_card(cols_row2[1], "Rotate", "🔄", "Change the orientation of pages within a PDF file.", 'pdf_rot', 'btn_pdf_rot')
+    render_tool_card(cols_row2[2], "Convert", "📐", "Conversion of a PDF file dynamically.", 'pdf_con', 'btn_pdf_con')
+    render_tool_card(cols_row2[3], "Summarize", "📝", "Generate summaries of uploaded PDFs without Generative AI.", 'pdf_sum', 'btn_pdf_sum')
+                                                    
 #---------------------------------------------------------------------------------------------------------------------------------
 ### View
 #---------------------------------------------------------------------------------------------------------------------------------
@@ -501,32 +432,18 @@ if st.session_state.page == 'home':
 #with tab1:
 #if page == "view":
 elif st.session_state.page == 'pdf_view':
-    
-            #st.divider()
             
-            # ← Home button (top-left)
-            col_home, title= st.columns([1,15,])
+            st.markdown("---")      
+            col_home, title= st.columns([2,15,])
+            
             with col_home:
-                if st.button("← Home", key="home_fd", type="secondary", use_container_width=True):
+                if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
                     go_home()
                     st.rerun()
 
             with title:
-                st.markdown("""
-                <style>
-                .banner {
-                    background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
-                    border-radius: 12px;padding: 5px;margin: 5px 0;border: 1px solid rgba(0, 86, 179, 0.15);text-align: center;
-                    font-size: 1.15rem;color: #0056b3;font-weight: 600;}
-                </style>
-                <div class="banner">
-                    PDF Playground
-                </div>
-                """, unsafe_allow_html=True)    
-
-            #st.session_state.pdf_tab = "View"
-            st.info("""The **View** tab allows you to preview PDF files directly within the application. You can upload a PDF and view its content without any external software.""")
-
+                st.info("""The **View** tab allows you to preview PDF files directly within the application. You can upload a PDF and view its content without any external software.""")
+            
             col1, col2, col3 = st.columns((0.2,0.6,0.2))
             with col1:           
                 with st.container(border=True):
@@ -536,7 +453,7 @@ elif st.session_state.page == 'pdf_view':
 
                         try:
                             with col2:
-                                with st.container(border=True):
+                                with st.container(border=True, height=800):
                                     
                                     images = pdf_to_images(uploaded_file)
                                     if images and isinstance(images, list):
@@ -564,11 +481,20 @@ elif st.session_state.page == 'pdf_view':
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab2:
-if page == "extract":
+#if page == "extract":
+elif st.session_state.page == 'pdf_ext':
 
-            #st.session_state.pdf_tab = "Extract"        
-            st.info("""The **Extract** tab is designed to extract text and metadata from PDF files. You can upload a PDF, and the tool will pull out the text content for further analysis or editing.""")
+            st.markdown("---")
+            col_home, title= st.columns([2,15,])
+            
+            with col_home:
+                if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                    go_home()
+                    st.rerun()
 
+            with title:
+                st.info("""The **Extract** tab is designed to extract text and metadata from PDF files. You can upload a PDF, and the tool will pull out the text content for further analysis or editing.""")
+       
             col1, col2 = st.columns((0.2,0.8))
             with col1:           
                 with st.container(border=True):            
@@ -644,10 +570,19 @@ if page == "extract":
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab3:
-if page == "merge":
-    
-            #st.session_state.pdf_tab = "Merge"   
-            st.info("""The **Merge** tab lets you combine multiple PDF files into a single document. Simply upload the PDFs you wish to merge, arrange them in the desired order, and merge them into one.""")
+#if page == "merge":
+elif st.session_state.page == 'pdf_mer':    
+
+            st.markdown("---")    
+            col_home, title= st.columns([2,15,])
+            
+            with col_home:
+                if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                    go_home()
+                    st.rerun()
+
+            with title:
+                st.info("""The **Extract** tab is designed to extract text and metadata from PDF files. You can upload a PDF, and the tool will pull out the text content for further analysis or editing.""")
 
             col1, col2 = st.columns((0.2,0.8))
             with col1:           
@@ -680,14 +615,19 @@ if page == "merge":
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab4:
-if page == "compress":
-    
-    #st.session_state.pdf_tab = "Compress"   
-    st.info("""The **Compress/Resize** tab is used to reduce the file size of PDF documents. This is useful when you need to share files with size restrictions or save storage space.""") 
+#if page == "compress":
+elif st.session_state.page == 'pdf_comp':
 
-    #st.session_state.pdf_tab = "Resize"
-    #st.info("""The **Resize** tab allows you to adjust the dimensions of a PDF file. You can scale the content to a desired size, either enlarging or shrinking it as needed.""")
-    #st.info('**Disclaimer : This portion is under Development**', icon="ℹ️")
+    st.markdown("---")    
+    col_home, title= st.columns([2,15,])
+            
+    with col_home:
+        if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+            go_home()
+            st.rerun()
+
+    with title:
+        st.info("""The **Compress/Resize** tab is used to reduce the file size of PDF documents. This is useful when you need to share files with size restrictions or save storage space.""") 
         
     col1, col2 = st.columns((0.2,0.8))
     with col1:           
@@ -725,10 +665,19 @@ if page == "compress":
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab5:
-if page == "protect":
+#if page == "protect":
+elif st.session_state.page == 'pdf_pro':
 
-        #st.session_state.pdf_tab = "Protect" 
-        st.info("""The **Protect** tab enables you to add password protection to your PDF files. You can set a password to prevent unauthorized access or editing of your documents.""")
+        st.markdown("---")            
+        col_home, title= st.columns([2,15,])
+            
+        with col_home:
+            if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                go_home()
+                st.rerun()
+
+        with title:  
+            st.info("""The **Protect** tab enables you to add password protection to your PDF files. You can set a password to prevent unauthorized access or editing of your documents.""")
         
         col1, col2 = st.columns((0.2,0.8))
         with col1:           
@@ -771,10 +720,19 @@ if page == "protect":
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab6:
-if page == "unlock":    
+#if page == "unlock":    
+elif st.session_state.page == 'pdf_un':
 
-        #st.session_state.pdf_tab = "Unlock" 
-        st.info("""The **Unlock** tab allows you to remove password protection from PDF files. If you have a secured PDF and you know the password, you can unlock it for easier access.""")
+        st.markdown("---")
+        col_home, title= st.columns([2,15,])
+            
+        with col_home:
+            if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                go_home()
+                st.rerun()
+
+        with title:   
+            st.info("""The **Unlock** tab allows you to remove password protection from PDF files. If you have a secured PDF and you know the password, you can unlock it for easier access.""")
 
         col1, col2 = st.columns((0.2,0.8))
         with col1:           
@@ -818,10 +776,19 @@ if page == "unlock":
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab7:
-if page == "rotate":
+#if page == "rotate":
+elif st.session_state.page == 'pdf_rot':
 
-        #st.session_state.pdf_tab = "Rotate"
-        st.info("""The **Rotate** tab lets you change the orientation of pages within a PDF file. You can rotate individual pages or the entire document to correct their orientation.""")
+        st.markdown("---")
+        col_home, title= st.columns([2,15,])
+            
+        with col_home:
+            if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                go_home()
+                st.rerun()
+
+        with title:
+            st.info("""The **Rotate** tab lets you change the orientation of pages within a PDF file. You can rotate individual pages or the entire document to correct their orientation.""")
 
         col1, col2 = st.columns((0.2,0.8))
         with col1:           
@@ -865,11 +832,20 @@ if page == "rotate":
 #---------------------------------------------------------------------------------------------------------------------------------
 
 #with tab9:
-if page == "convert":
-    
-        #st.session_state.pdf_tab = "Convert"
-        st.info("""The **Convert** tab offers conversion options between PDF and other formats, such as Word or images. You can upload a PDF and convert it to a different format or vice versa.""")
-        #st.info('**Disclaimer : This portion is under Development**', icon="ℹ️")
+#if page == "convert":
+elif st.session_state.page == 'pdf_rot':
+
+        st.markdown("---")
+        col_home, title= st.columns([2,15,])
+            
+        with col_home:
+            if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                go_home()
+                st.rerun()
+
+        with title:
+     
+            st.info("""The **Convert** tab offers conversion options between PDF and other formats, such as Word or images. You can upload a PDF and convert it to a different format or vice versa.""")
 
         col1, col2 = st.columns((0.2,0.8))
         with col1:           
@@ -924,10 +900,19 @@ if page == "convert":
 ### Summarization
 #---------------------------------------------------------------------------------------------------------------------------------
 
-if page == "summary":
-    
-        #st.session_state.pdf_tab = "Summarization"
-        st.info("""The **Summarization** tab offers summary of the uploaded pdf without using GenAI.""")
+#if page == "summary":
+elif st.session_state.page == 'pdf_sum':
+
+        st.markdown("---")
+        col_home, title= st.columns([2,15,])
+            
+        with col_home:
+            if st.button("Home", icon="🏠", key="home_fd", type="secondary", use_container_width=True):
+                go_home()
+                st.rerun()
+
+        with title:   
+            st.info("""The **Summarization** tab offers summary of the uploaded pdf without using GenAI.""")
 
         col1, col2 = st.columns((0.2,0.8))
         with col1:           
@@ -976,37 +961,3 @@ if page == "summary":
                  
 #---------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-                                #pdf_file_path = f"temp_{uploaded_file.name}"
-                                #output_file_name = os.path.splitext(uploaded_file.name)[0]
-                                #with open(pdf_file_path, "wb") as f:
-                                    #f.write(uploaded_file.getbuffer())
-                                #if conversion_type == "Word Document (.docx)":
-                                    #word_file_path = f"{output_file_name}.docx"
-                                    #with st.spinner("Converting to Word..."):
-                                        #converter = Converter(pdf_file_path)
-                                        #converter.convert(word_file_path, start=0, end=None)
-                                        #converter.close()
-
-                                    #with open(word_file_path, "rb") as f:
-                                        #st.success("PDF converted to Word successfully!")
-                                        #st.download_button(label="**📥 Download Word File**", data=f, file_name=word_file_path, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-            
-                                    #os.remove(word_file_path)
-        
-                                #elif conversion_type == "Plain Text (.txt)":
-                                    #text_file_path = f"{output_file_name}.txt"
-                                    #with st.spinner("Converting to Text..."):
-                                        #text = extract_text(pdf_file_path)
-                                        #with open(text_file_path, "w") as f:
-                                            #f.write(text)
-
-                                        #with open(text_file_path, "rb") as f:
-                                            #st.success("PDF converted to Text successfully!")
-                                            #st.download_button(label="**📥 Download Text File**", data=f, file_name=text_file_path, mime="text/plain")
-
-                                    #os.remove(text_file_path)
-
-                                #os.remove(pdf_file_path)
